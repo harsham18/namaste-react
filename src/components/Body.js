@@ -2,22 +2,18 @@ import { useEffect, useState } from "react";
 import RestaurantCard from "./RestaurantCard";
 import Shimmer from "./Shimmer";
 import { Link } from "react-router";
+import useOnlineStatus from "../utils/useOnlineStatus";
+import { filterData, topRatedData } from "../utils/helper";
 
 const Body = () => {
   const [listOfRestaurants, setlistOfRestaurants] = useState([]);
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [searchBtn, setSearchBtn] = useState("");
+  const onlineStatus = useOnlineStatus();
 
   useEffect(() => {
     getRestaurants();
   }, []);
-
-  const filterBtn = () => {
-    const filtered = listOfRestaurants.filter(
-      (res) => res.info.avgRating > 4.0
-    );
-    setFilteredRestaurants(filtered);
-  };
 
   const getRestaurants = async () => {
     try {
@@ -38,7 +34,9 @@ const Body = () => {
       console.log("Error fetching Restaurant", error);
     }
   };
-
+  if (onlineStatus === false) {
+    return <h1>Please check your internet connection</h1>;
+  }
   return listOfRestaurants === 0 ? (
     <Shimmer />
   ) : (
@@ -55,21 +53,26 @@ const Body = () => {
           />
           <button
             onClick={() => {
-              const filtered = listOfRestaurants.filter((res) =>
-                res.info.name.toLowerCase().includes(searchBtn.toLowerCase())
-              );
-              setFilteredRestaurants(filtered);
+              const filteredData = filterData(searchBtn, listOfRestaurants);
+              setFilteredRestaurants(filteredData);
             }}
           >
             Search
           </button>
         </div>
         <div className="top-rated">
-          <button onClick={filterBtn}>Top Rated Restaurant</button>
+          <button
+            onClick={() => {
+              const topRated = topRatedData(listOfRestaurants);
+              setFilteredRestaurants(topRated);
+            }}
+          >
+            Top Rated Restaurant
+          </button>
         </div>
       </div>
       <div className="resto-container">
-        {filteredRestaurants.map((restaurant) => (
+        {filteredRestaurants.map((restaurant, i) => (
           <Link to={`/restaurants/${restaurant?.info?.id}`}>
             <RestaurantCard
               key={restaurant?.info?.id}

@@ -59,3 +59,8 @@
 .top-rated{
     padding-left: 5px;
 }
+.profile-card{
+    border: 1px solid black;
+    padding: 10px;
+    margin: 5px;
+}
